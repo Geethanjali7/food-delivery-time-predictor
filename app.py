@@ -12,11 +12,11 @@ from sklearn.metrics import mean_squared_error
 def train_model():
     data = pd.read_csv("Food_Delivery_Times.csv")
     
-    # Fill missing values
-    data['Weather'].fillna(data['Weather'].mode()[0], inplace=True)
-    data['Traffic_Level'].fillna(data['Traffic_Level'].mode()[0], inplace=True)
-    data['Time_of_Day'].fillna(data['Time_of_Day'].mode()[0], inplace=True)
-    data['Courier_Experience_yrs'].fillna(data['Courier_Experience_yrs'].median(), inplace=True)
+    
+   data['Weather'] = data['Weather'].fillna(data['Weather'].mode()[0])
+   data['Traffic_Level'] = data['Traffic_Level'].fillna(data['Traffic_Level'].mode()[0])
+   data['Time_of_Day'] = data['Time_of_Day'].fillna(data['Time_of_Day'].mode()[0])
+   data['Courier_Experience_yrs'] = data['Courier_Experience_yrs'].fillna(data['Courier_Experience_yrs'].median())
     
     # One-hot encoding
     data = pd.get_dummies(data, columns=['Weather','Traffic_Level','Time_of_Day','Vehicle_Type'])
