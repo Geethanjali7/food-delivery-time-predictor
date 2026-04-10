@@ -10,7 +10,7 @@ from sklearn.metrics import mean_squared_error
 # -----------------------------
 @st.cache_data
 def train_model():
-    data = pd.read_csv("D://ml_projects//food_delivery_time//Food_Delivery_Times.csv")
+    data = pd.read_csv("Food_Delivery_Times.csv")
     
     # Fill missing values
     data['Weather'].fillna(data['Weather'].mode()[0], inplace=True)
