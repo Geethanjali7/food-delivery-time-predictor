@@ -80,6 +80,7 @@ input_df = input_df.reindex(columns=feature_columns, fill_value=0)
 # -----------------------------
 if st.button("Predict Delivery Time"):
     
+    with st.spinner("Predicting..."):
     prediction = model.predict(input_df)[0]
     
     lower = max(0, prediction - rmse)
