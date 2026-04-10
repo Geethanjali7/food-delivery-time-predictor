@@ -8,7 +8,7 @@ from sklearn.metrics import mean_squared_error
 # -----------------------------
 # 1️⃣ Train Model
 # -----------------------------
-@st.cache_data
+@st.cache_resource
 def train_model():
     data = pd.read_csv("Food_Delivery_Times.csv")
     
