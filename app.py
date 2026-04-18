@@ -2,38 +2,45 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.linear_model import Ridge
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error
-
 
 @st.cache_resource
 def train_model():
     data = pd.read_csv("Food_Delivery_Times.csv")
+    
+    # Handle missing values
     data['Weather'] = data['Weather'].fillna(data['Weather'].mode()[0])
     data['Traffic_Level'] = data['Traffic_Level'].fillna(data['Traffic_Level'].mode()[0])
     data['Time_of_Day'] = data['Time_of_Day'].fillna(data['Time_of_Day'].mode()[0])
     data['Courier_Experience_yrs'] = data['Courier_Experience_yrs'].fillna(data['Courier_Experience_yrs'].median())
     
-    # One-hot encoding
+    
     data = pd.get_dummies(data, columns=['Weather','Traffic_Level','Time_of_Day','Vehicle_Type'])
     
     X = data.drop(columns=['Order_ID','Delivery_Time_min'])
     y = data['Delivery_Time_min']
     
-    model = GradientBoostingRegressor()
-    model.fit(X, y)
+   
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+  
+    model = Ridge(alpha=1.0)
+    model.fit(X_scaled, y)
     
    
-    preds = model.predict(X)
+    preds = model.predict(X_scaled)
     rmse = np.sqrt(mean_squared_error(y, preds))
     
-    return model, X.columns, rmse
+    return model, scaler, X.columns, rmse
 
 
-model, feature_columns, rmse = train_model()
+model, scaler, feature_columns, rmse = train_model()
 
 
-st.title("Food Delivery Time Predictor ")
+st.title(" Food Delivery Time Predictor")
 st.write("Predict delivery time as a realistic range instead of exact value.")
 
 
@@ -64,24 +71,25 @@ for col in feature_columns:
     elif col.startswith("Vehicle_Type_"):
         input_dict[col] = 1 if col == "Vehicle_Type_" + vehicle_type else 0
 
+
 input_df = pd.DataFrame([input_dict])
 
 
 input_df = input_df.reindex(columns=feature_columns, fill_value=0)
 
 
+input_scaled = scaler.transform(input_df)
+
+
 if st.button("Predict Delivery Time"):
     with st.spinner("Predicting..."):
-        prediction = model.predict(input_df)[0]
+        prediction = model.predict(input_scaled)[0]
     
     lower = max(0, prediction - rmse)
     upper = prediction + rmse
     
     st.success(f"Estimated Delivery Time: {lower:.0f} - {upper:.0f} minutes")
     
-
-    
-
     if prediction < 20:
         st.info("Fast delivery expected!")
     elif prediction < 40:
