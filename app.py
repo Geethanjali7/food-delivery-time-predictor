@@ -5,9 +5,7 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error
 
-# -----------------------------
-# 1️⃣ Train Model
-# -----------------------------
+
 @st.cache_resource
 def train_model():
     data = pd.read_csv("Food_Delivery_Times.csv")
@@ -25,7 +23,7 @@ def train_model():
     model = GradientBoostingRegressor()
     model.fit(X, y)
     
-    # 🔥 Calculate RMSE for range
+   
     preds = model.predict(X)
     rmse = np.sqrt(mean_squared_error(y, preds))
     
@@ -34,13 +32,11 @@ def train_model():
 
 model, feature_columns, rmse = train_model()
 
-# -----------------------------
-# 2️⃣ UI
-# -----------------------------
-st.title("Food Delivery Time Predictor 🍔🛵")
+
+st.title("Food Delivery Time Predictor ")
 st.write("Predict delivery time as a realistic range instead of exact value.")
 
-# Inputs
+
 distance = st.number_input("Distance (km)", 0.1, 50.0, 5.0)
 courier_exp = st.number_input("Courier Experience (yrs)", 0, 20, 2)
 prep_time = st.number_input("Preparation Time (min)", 1, 60, 10)
@@ -50,16 +46,14 @@ traffic = st.selectbox("Traffic Level", ["Low", "Medium", "High"])
 time_of_day = st.selectbox("Time of Day", ["Morning", "Afternoon", "Evening", "Night"])
 vehicle_type = st.selectbox("Vehicle Type", ["Bike", "Scooter", "Car", "Motorcycle"])
 
-# -----------------------------
-# 3️⃣ Prepare Input
-# -----------------------------
+
 input_dict = {
     'Distance_km': distance,
     'Courier_Experience_yrs': courier_exp,
     'Preparation_Time_min': prep_time
 }
 
-# One-hot encoding
+
 for col in feature_columns:
     if col.startswith("Weather_"):
         input_dict[col] = 1 if col == "Weather_" + weather else 0
@@ -72,12 +66,10 @@ for col in feature_columns:
 
 input_df = pd.DataFrame([input_dict])
 
-# 🔥 Ensure same columns
+
 input_df = input_df.reindex(columns=feature_columns, fill_value=0)
 
-# -----------------------------
-# 4️⃣ Prediction (Range)
-# -----------------------------
+
 if st.button("Predict Delivery Time"):
     with st.spinner("Predicting..."):
         prediction = model.predict(input_df)[0]
@@ -85,15 +77,14 @@ if st.button("Predict Delivery Time"):
     lower = max(0, prediction - rmse)
     upper = prediction + rmse
     
-    # Show range
     st.success(f"Estimated Delivery Time: {lower:.0f} - {upper:.0f} minutes")
     
 
     
-    # Extra interpretation
+
     if prediction < 20:
-        st.info("🚀 Fast delivery expected!")
+        st.info("Fast delivery expected!")
     elif prediction < 40:
-        st.warning("⏳ Moderate delivery time.")
+        st.warning("Moderate delivery time.")
     else:
-        st.error("🐢 Delivery might be delayed.")
+        st.error("Delivery might be delayed.")
